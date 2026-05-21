@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kigali Population Heatmap 2022</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    body { margin: 0; }
+    #map { height: 100vh; width: 100%; }
+    .info-box {
+      background: white;
+      padding: 10px 14px;
+      border-radius: 6px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+    }
+    .info-box h4 { margin: 0 0 6px 0; }
+  </style>
+  <style>
+  #navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 2000;
+    background: #1a1a2e;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    height: 52px;
+    gap: 10px;
+  }
+  .nav-btn {
+    padding: 7px 18px;
+    border: none;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+  }
+  .nav-btn:hover { background: #4fc3f7; color: #1a1a2e; }
+  #map { height: 100vh; width: 100%; padding-top: 52px; }
+</style>
+</head>
+<body>
+    <div id="navbar">
+  <span style="color:#fff; font-weight:bold; margin-right:auto;">🗺️ Kigali GIS Maps</span>
+  <button class="nav-btn" onclick="location.href='index.html'">📦 Cadastral Parcels</button>
+  <button class="nav-btn" onclick="location.href='heatmap.html'">🌡️ Population Heatmap</button>
+</div>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
+<script>
+
+  var map = L.map("map").setView([-1.9441, 30.0619], 12);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(map);
+
+  // 2022 Census data: [latitude, longitude, population/area_km2]
+  var heatData = [
+    [-1.9536, 30.0606, 51805/4.1],
+    [-1.9612, 30.0598, 42311/3.8],
+    [-1.9823, 30.0185, 28044/12.0],
+    [-1.9441, 30.0619, 19503/2.1],
+    [-1.9682, 30.0490, 52673/2.6],
+    [-2.0234, 30.0012, 18512/23.5],
+    [-1.9510, 30.0532, 28890/2.0],
+    [-1.9601, 30.0512, 35422/2.4],
+    [-1.9758, 30.0384, 61340/5.2],
+    [-1.9487, 30.0589, 21055/3.5],
+    [-1.9638, 30.0556, 30218/2.7],
+    [-1.8612, 30.1023, 30101/27.6],
+    [-1.9012, 30.0645, 37655/6.1],
+    [-1.8534, 30.1356, 25345/41.8],
+    [-1.8912, 30.0878, 42118/8.3],
+    [-1.8723, 30.1289, 31209/26.5],
+    [-1.8945, 30.1545, 22450/18.4],
+    [-1.9312, 30.0934, 28771/5.8],
+    [-1.9378, 30.0978, 28432/4.9],
+    [-1.9189, 30.1123, 74374/10.5],
+    [-1.8856, 30.1234, 43218/18.1],
+    [-1.8645, 30.1478, 36745/29.3],
+    [-1.8423, 30.0923, 27109/42.7],
+    [-1.9267, 30.1034, 63901/7.1],
+    [-1.8312, 30.1645, 40215/43.5],
+    [-1.8534, 30.1023, 17342/29.1],
+    [-2.0134, 30.1023, 45011/28.4],
+    [-1.9834, 30.0978, 43780/6.4],
+    [-1.9712, 30.0834, 38976/5.8],
+    [-1.9923, 30.1056, 37543/9.3],
+    [-1.9634, 30.1312, 42671/26.7],
+    [-1.9812, 30.0934, 39820/5.3],
+    [-2.0045, 30.1178, 35609/35.7],
+    [-1.9945, 30.0856, 31247/5.9],
+    [-1.9756, 30.1045, 36451/9.1],
+  ];
+
+  // Create heatmap
+  L.heatLayer(heatData, {
+    radius: 35,
+    blur: 25,
+    maxZoom: 15,
+    gradient: {
+      0.1: "blue",
+      0.3: "cyan",
+      0.5: "lime",
+      0.7: "yellow",
+      1.0: "red"
+    }
+  }).addTo(map);
+
+  // Title box
+  var title = L.control({ position: "topright" });
+  title.onAdd = function() {
+    var div = L.DomUtil.create("div", "info-box");
+    div.innerHTML =
+      "<h4>🌡️ Kigali Population Density</h4>" +
+      "<small>2022 Census | 35 Sectors<br>" +
+      "Intensity = Population / Area (km²)</small><br><br>" +
+      "<span style='color:blue'>■</span> Low density<br>" +
+      "<span style='color:cyan'>■</span> Medium-low<br>" +
+      "<span style='color:lime'>■</span> Medium<br>" +
+      "<span style='color:orange'>■</span> Medium-high<br>" +
+      "<span style='color:red'>■</span> High density";
+    return div;
+  };
+  title.addTo(map);
+
+</script>
+</body>
+</html>
